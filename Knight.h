@@ -1,0 +1,16 @@
+#ifndef KNIGHT_H
+#define KNIGHT_H
+
+#include "Chess_Piece.h"
+
+class Knight : public Chess_Piece {
+public:
+    // Konstruktor
+    Knight(int x_coord, int y_coord, const std::string& color)
+        : Chess_Piece(x_coord, y_coord, color) {}
+
+    bool is_move_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const override;
+    char getPieceType() const override;
+};
+
+#endif // KNIGHT_H
