@@ -79,42 +79,6 @@ build CMakeFiles/chess.dir/Chess_Piece.cpp.obj: CXX_COMPILER__chess_unscanned_De
   OBJECT_DIR = CMakeFiles\chess.dir
   OBJECT_FILE_DIR = CMakeFiles\chess.dir
 
-build CMakeFiles/chess.dir/Rook.cpp.obj: CXX_COMPILER__chess_unscanned_Debug C$:/Users/tim.janick.july/CLionProjects/chess/Rook.cpp || cmake_object_order_depends_target_chess
-  DEP_FILE = CMakeFiles\chess.dir\Rook.cpp.obj.d
-  FLAGS = -g -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\chess.dir
-  OBJECT_FILE_DIR = CMakeFiles\chess.dir
-
-build CMakeFiles/chess.dir/Knight.cpp.obj: CXX_COMPILER__chess_unscanned_Debug C$:/Users/tim.janick.july/CLionProjects/chess/Knight.cpp || cmake_object_order_depends_target_chess
-  DEP_FILE = CMakeFiles\chess.dir\Knight.cpp.obj.d
-  FLAGS = -g -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\chess.dir
-  OBJECT_FILE_DIR = CMakeFiles\chess.dir
-
-build CMakeFiles/chess.dir/Bishop.cpp.obj: CXX_COMPILER__chess_unscanned_Debug C$:/Users/tim.janick.july/CLionProjects/chess/Bishop.cpp || cmake_object_order_depends_target_chess
-  DEP_FILE = CMakeFiles\chess.dir\Bishop.cpp.obj.d
-  FLAGS = -g -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\chess.dir
-  OBJECT_FILE_DIR = CMakeFiles\chess.dir
-
-build CMakeFiles/chess.dir/Queen.cpp.obj: CXX_COMPILER__chess_unscanned_Debug C$:/Users/tim.janick.july/CLionProjects/chess/Queen.cpp || cmake_object_order_depends_target_chess
-  DEP_FILE = CMakeFiles\chess.dir\Queen.cpp.obj.d
-  FLAGS = -g -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\chess.dir
-  OBJECT_FILE_DIR = CMakeFiles\chess.dir
-
-build CMakeFiles/chess.dir/Pawn.cpp.obj: CXX_COMPILER__chess_unscanned_Debug C$:/Users/tim.janick.july/CLionProjects/chess/Pawn.cpp || cmake_object_order_depends_target_chess
-  DEP_FILE = CMakeFiles\chess.dir\Pawn.cpp.obj.d
-  FLAGS = -g -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\chess.dir
-  OBJECT_FILE_DIR = CMakeFiles\chess.dir
-
-build CMakeFiles/chess.dir/King.cpp.obj: CXX_COMPILER__chess_unscanned_Debug C$:/Users/tim.janick.july/CLionProjects/chess/King.cpp || cmake_object_order_depends_target_chess
-  DEP_FILE = CMakeFiles\chess.dir\King.cpp.obj.d
-  FLAGS = -g -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\chess.dir
-  OBJECT_FILE_DIR = CMakeFiles\chess.dir
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target chess
@@ -123,7 +87,7 @@ build CMakeFiles/chess.dir/King.cpp.obj: CXX_COMPILER__chess_unscanned_Debug C$:
 #############################################
 # Link the executable chess.exe
 
-build chess.exe: CXX_EXECUTABLE_LINKER__chess_Debug CMakeFiles/chess.dir/main.cpp.obj CMakeFiles/chess.dir/game.cpp.obj CMakeFiles/chess.dir/tmp.cpp.obj CMakeFiles/chess.dir/Move.cpp.obj CMakeFiles/chess.dir/Chess_Piece.cpp.obj CMakeFiles/chess.dir/Rook.cpp.obj CMakeFiles/chess.dir/Knight.cpp.obj CMakeFiles/chess.dir/Bishop.cpp.obj CMakeFiles/chess.dir/Queen.cpp.obj CMakeFiles/chess.dir/Pawn.cpp.obj CMakeFiles/chess.dir/King.cpp.obj
+build chess.exe: CXX_EXECUTABLE_LINKER__chess_Debug CMakeFiles/chess.dir/main.cpp.obj CMakeFiles/chess.dir/game.cpp.obj CMakeFiles/chess.dir/tmp.cpp.obj CMakeFiles/chess.dir/Move.cpp.obj CMakeFiles/chess.dir/Chess_Piece.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\chess.dir

@@ -10,6 +10,8 @@
 #include <algorithm>
 #include "move.h"
 #include "Chess_Piece.h"
+#include <cstdint>
+#include <utility>
 using Coordinates = std::tuple<int, int>;
 
 #define EE 0
@@ -26,14 +28,27 @@ using Coordinates = std::tuple<int, int>;
 #define WR 5
 #define WP 1
 
-class Board : public std::enable_shared_from_this<Board> {
+class Game : public std::enable_shared_from_this<Game> {
 public:
+
+    std::vector<std::string> game_history_str;
+
+    int active_player;
 
     std::tuple<int, int> white_king_pos;
     std::tuple<int, int> black_king_pos;
 
     std::vector<std::shared_ptr<Chess_Piece>> white_pieces;
     std::vector<std::shared_ptr<Chess_Piece>> black_pieces;
+
+    std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> active_pieces;
+    std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> passive_pieces;
+
+    std::shared_ptr<std::tuple<int, int>> active_king_pos;
+    std::shared_ptr<std::tuple<int, int>> passive_king_pos;
+
+    bool is_active_player_in_check;
+    bool is_passive_player_in_check;
 
     // for castle rights
     bool has_black_king_moved;
@@ -43,44 +58,66 @@ public:
     bool has_black_a_rook_moved;
     bool has_black_h_rook_moved;
 
-    bool black_king_in_check;
-    bool white_king_in_check;
 
-    // Getter and Setter for black_king_in_check
-    bool get_black_king_in_check() const { return black_king_in_check; }
-    void set_black_king_in_check(bool in_check) { black_king_in_check = in_check; }
+   std::shared_ptr<std::tuple<int,int>> capture_coords;
+    std::shared_ptr<std::tuple<int,int>> en_passant_coords;
 
-    // Getter and Setter for white_king_in_check
-    bool get_white_king_in_check() const { return white_king_in_check; }
-    void set_white_king_in_check(bool in_check) { white_king_in_check = in_check; }
-    bool check_castle(std::string current_player, std::string castle_type);
-    std::vector<std::shared_ptr<Chess_Piece>> find_moving_piece(const Move& move);
-    std::shared_ptr<Board> get_shared_ptr() { return shared_from_this(); }
+    bool check_castle(char castle_type);
+    std::vector<std::shared_ptr<Chess_Piece>> find_moving_piece_candidates(std::shared_ptr<Move> move);
+    std::shared_ptr<Game> get_shared_ptr() { return shared_from_this(); }
     static std::unordered_map<int, std::string> valueToPiece;
     static std::unordered_map<std::string, int> pieceToValue;
     std::shared_ptr<Chess_Piece> create_piece(int val, int row_coord, int col_coord);
     std::tuple<int, int> en_passant_option;
-    void execute_move(Chess_Piece& piece, int target_coord_row, int target_coord_col, bool is_capture);
-    void execute_castle(std::string current_player, std::string castle_type);
-    bool test_for_check(const std::tuple<int, int>& king_position,
-                       const std::vector<std::shared_ptr<Chess_Piece>>& piece_list,
-                       const int board[8][8]) const;
-
-    Board();
-    void print_board() const;
-    bool consider_move(std::string& str_player_move);
+    void execute_move(std::shared_ptr<Chess_Piece> piece, std::shared_ptr<Move> move);
+    void execute_castle(char castle_type);
+    bool is_square_attacked(const std::tuple<int, int> &square,
+                            std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> attacking_pieces,
+                            const int8_t board_state[8][8], bool is_defense) const;;
+    void print_pieces_debug();
+    Game();
+    void print_board_state() const;
+    bool consider_move(std::shared_ptr<Move> move);
+    bool is_checkmate(
+        std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> attacking_pieces,
+        std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> defending_pieces);
     std::tuple<int, int> get_enpassant_option() { return en_passant_option; }
     void set_enpassant_option(int x, int y) {
         en_passant_option = std::make_tuple(x, y);
     }
-    bool test_check_simulation(
-        const std::shared_ptr<Chess_Piece>& piece,
-        const Move& move,
-        const int board_state[8][8],
-        const std::vector<std::shared_ptr<Chess_Piece>>* pieces_opponent, bool is_capture
-    ) const;
+    int handle_turn(std::string& str_player_move);
+    bool is_own_king_in_check_after_move(
+        const std::shared_ptr<Chess_Piece> piece_to_move,
+        std::shared_ptr<Move> move,
+        const int8_t board_state[8][8]
+    );
 
-    int board_state[8][8] = {
+    bool is_attack_diagonal(std::tuple<int, int> defending_king_pos, std::shared_ptr<Chess_Piece> attacking_piece) const;
+    bool is_attack_vertical(std::tuple<int, int> defending_king_pos, std::shared_ptr<Chess_Piece> attacking_piece) const;
+    bool is_attack_horizontal(std::tuple<int, int> defending_king_pos, std::shared_ptr<Chess_Piece> attacking_piece) const;
+    void clean_up_after_turn();
+    std::vector<std::tuple<int, int>> compute_block_squares_diag(
+    const std::tuple<int, int>& defending_king_pos,
+    int attacking_piece_row,
+    int attacking_piece_col,
+    const std::vector<std::tuple<int, int>>& blockable_squares
+)const;
+    std::vector<std::tuple<int, int>> compute_block_squares_vertical(
+        const std::tuple<int, int>& defending_king_pos,
+        int attacking_piece_row,
+        int attacking_piece_col,
+        const std::vector<std::tuple<int, int>>& blockable_squares
+    ) const;
+    std::vector<std::tuple<int, int>> compute_block_squares_horizontal(
+        const std::tuple<int, int>& defending_king_pos,
+        int attacking_piece_row,
+        int attacking_piece_col,
+        const std::vector<std::tuple<int, int>>& blockable_squares
+    ) const;
+    void switchPlayer();
+    void print_history();
+
+    int8_t board_state[8][8] = {
         {WR, WN, WB, WQ, WK, WB, WN, WR},
         {WP, WP, WP, WP, WP, WP, WP, WP},
         {EE, EE, EE, EE, EE, EE, EE, EE},
@@ -90,7 +127,9 @@ public:
         {BP, BP, BP, BP, BP, BP, BP, BP},
         {BR, BN, BB, BQ, BK, BB, BN, BR}
     };
-    std::string player_turn;
-};
 
+
+std::vector<std::shared_ptr<Move>> get_available_moves(std::shared_ptr<Chess_Piece> piece);
+
+};
 #endif // BOARD_H

@@ -2,44 +2,58 @@
 #include <memory> // Für std::shared_ptr
 #include "game.h"
 
-void print_board(const Board& board) {
-    board.print_board();
+void print_board(const Game& board) {
+    board.print_board_state();
 }
 
 int main() {
 
 
-    auto board = std::make_shared<Board>();
+    auto board = std::make_shared<Game>();
     std::string move_input;
     std::string game_mode;
-    bool valid_move;
+    int valid_move;
 
-    //std::cout << board->player_turn << "Choose game mode: 'classic', 'blind'\n";
-    //std::getline(std::cin, game_mode);
-    //if (game_mode == "classic"){
+
     while (true) {
+            std::cout << "\n\n";
+            board->print_history();
+            std::cout << "\n";
             print_board(*board);
-        std::cout << "White King Check: " << (board->get_white_king_in_check() ? "Yes" : "No")
-      << " , Black King Check: " << (board->get_black_king_in_check() ? "Yes" : "No")
-      << "\n";
-            std::cout << board->player_turn << "'s Turn, Your move: \n";
+        if (board->active_player ==  1) {
+            std::cout << "White's Turn, Your move: \n";
+        }
+        else {
+            std::cout << "Blacks's Turn, Your move: \n";
+        }
+        if (board->is_passive_player_in_check) {
+            std::cout << "Your King is in check!\n";
+        }
             std::getline(std::cin, move_input);
-            valid_move = board->consider_move(move_input);
 
-            if (valid_move) {
-                // Wenn der Zug gültig war, wechsle den Spieler
+            valid_move = board->handle_turn(move_input);
+            if (valid_move == 2) {
                 std::cout << "\n";
-                board->player_turn = (board->player_turn == "black") ? "white" : "black";
-            } else {
-                // Wenn der Zug ungültig war, informiere den Spieler und fordere ihn auf, es erneut zu versuchen
-                std::cout << "Try Again\n";
-
+            }
+        if  (valid_move == 1) {
+            std::cout << "Invalid Synatx\n";
+        }
+        if  (valid_move == -1) {
+            std::cout << "Illegal move\n";
+        }
+            if (valid_move == 0)
+                {
+                std::cout << "Check and Mate\n";
+                std::cout << "\n\n";
+                board->print_history();
+                std::cout << "\n";
+                print_board(*board);
+                break;
+            }
         }
 
-        // Optional: Hier könnten Sie die Bedingung zum Beenden des Spiels hinzufügen
-        // z.B. Abfrage, ob das Spiel beendet wurde (Schachmatt, Patt etc.)
     //}
-        }
+
 
     return 0;
 }

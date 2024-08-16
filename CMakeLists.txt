@@ -12,16 +12,5 @@ add_executable(chess main.cpp
         Move.cpp
         Chess_Piece.cpp
         Chess_Piece.h
-        Rook.cpp
-        Rook.h
-        Knight.cpp
-        Knight.h
-        Bishop.cpp
-        Bishop.h
-        Queen.cpp
-        Queen.h
-        Pawn.cpp
-        Pawn.h
-        King.cpp
-        King.h
+
 )

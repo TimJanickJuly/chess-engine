@@ -1,16 +1,7 @@
 #include "Move.h"
 #include <regex>
 #include <set>
-// Konstruktor
-Move::Move(bool legal, int x_start, int y_start,
-           int x_target, int y_target,
-           std::string castling, bool capturing, bool difficult,
-           char piece, bool check, bool mate)
-    : is_legal_move(legal), col_start(x_start), row_start(y_start),
-      row_target(x_target), col_target(y_target),
-      is_castling_move(castling), capturing_move(capturing),
-      difficult_move(difficult), piece_to_move(piece),
-      is_check(check), is_mate(mate) {}
+
 
 // Getter-Methoden
 bool Move::getIsLegalMove() const { return is_legal_move; }
@@ -19,8 +10,8 @@ int Move::get_col_CoordStart() const { return row_start; }
 int Move::get_row_CoordTarget() const { return row_target; }
 int Move::get_col_CoordTarget() const { return col_target; }
 std::string Move::getIsCastlingMove() const { return is_castling_move; }
-bool Move::getIsCapturingMove() const { return capturing_move; }
-bool Move::getIsDifficultMove() const { return difficult_move; }
+bool Move::getIsCapturingMove() const { return is_capture; }
+bool Move::getIsDifficultMove() const { return is_difficult; }
 char Move::getPieceToMove() const { return piece_to_move; }
 bool Move::getIsCheck() const { return is_check; }
 bool Move::getIsMate() const { return is_mate; }
@@ -32,8 +23,8 @@ void Move::set_col_CoordStart(int y_start) { row_start = y_start; }
 void Move::set_row_CoordTarget(int x_target) { row_target = x_target; }
 void Move::set_col_CoordTarget(int y_target) { col_target = y_target; }
 void Move::setIsCastlingMove(std::string castling) { is_castling_move = castling; }
-void Move::setIsCapturingMove(bool capturing) { capturing_move = capturing; }
-void Move::setIsDifficultMove(bool difficult) { difficult_move = difficult; }
+void Move::setIsCapturingMove(bool capturing) { is_capture = capturing; }
+void Move::setIsDifficultMove(bool difficult) { is_difficult = difficult; }
 void Move::setPieceToMove(char piece) { piece_to_move = piece; }
 void Move::setIsCheck(bool check) { is_check = check; }
 void Move::setIsMate(bool mate) { is_mate = mate; }
@@ -44,8 +35,8 @@ void Move::printMove() const {
               << "Start Position: (" << col_start << ", " << row_start << ")\n"
               << "Target Position: (" << row_target << ", " << col_target << ")\n"
               << "Castling Move: " << is_castling_move << "\n"
-              << "Capturing Move: " << is_capturing_move << "\n"
-              << "Difficult Move: " << is_difficult_move << "\n"
+              << "Capturing Move: " << is_capture << "\n"
+              << "Difficult Move: " << is_difficult << "\n"
               << "Piece to Move: " << piece_to_move << "\n"
               << "Check: " << is_check << "\n"
               << "Mate: " << is_mate << "\n";
@@ -71,19 +62,19 @@ std::string Move::get_algebraic_chess() const {
     if (getPieceToMove() != 'P') {
         result += getPieceToMove();
     }
-    
+
     if(get_row_CoordStart() != -1) {
         result += 'a' + col_start;
     }
-    
+
     if(get_col_CoordStart() != -1) {
         result += '1' + row_start;
     }
-    
+
     if(getIsCapturingMove()) {
         result += 'x';
     }
-    
+
     char target_row = 'a' + row_target;
     char target_col = '1' + col_target;
     result += target_col;
@@ -132,7 +123,6 @@ bool Move::is_difficult_move(const std::string& move) {
             letter_count++;
         }
 
-        // Wenn beide Bedingungen erfüllt sind, können wir sofort true zurückgeben.
         if (digit_count >= 2 || letter_count >= 2) {
             return true;
         }
@@ -161,7 +151,6 @@ bool Move::is_piece_move(const std::string& player_move) {
 
 
 
-
 Move Move::process_move_syntax(std::string& str_player_move) {
     Move move = Move();
 
@@ -187,76 +176,58 @@ Move Move::process_move_syntax(std::string& str_player_move) {
     if (str_player_move.back() == '#' || str_player_move.back() == '+') {
         if (str_player_move.back() == '#') {
             move.setIsMate(true);
-        }
-        else {
+        } else {
             move.setIsCheck(true);
         }
         str_player_move.pop_back();
     }
 
-
-
     if (is_difficult_move(str_player_move)) {
         move.setIsDifficultMove(true);
+    } else {
+        move.setIsDifficultMove(false);
     }
 
     if (str_player_move.find('x') != std::string::npos) {
         move.setIsCapturingMove(true);
+    } else {
+        move.setIsCapturingMove(false);
     }
 
-    if(is_piece_move(str_player_move)) {
-        char piece;
+    if (is_piece_move(str_player_move)) {
         move.setPieceToMove(str_player_move[0]);
-        str_player_move.erase(0,1);
-    }
-    else {
+        str_player_move.erase(0, 1);
+    } else {
         move.setPieceToMove('P');
     }
 
-
-    
-
-    if(!move.getIsDifficultMove()){
-        if(str_player_move[0] == 'x') {
-            str_player_move.erase(0,1);
+    if (!move.getIsDifficultMove()) {
+        if (str_player_move[0] == 'x') {
+            str_player_move.erase(0, 1);
         }
-
-
 
         move.set_col_CoordTarget(dict_col_coords.at(str_player_move[0]));
         move.set_row_CoordTarget(dict_row_coords.at(str_player_move[1]));
-
-
-    }
-
-
-    else if(move.getIsDifficultMove()) {
+    } else if (move.getIsDifficultMove()) {
         static const std::set<char> valid_chars = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
         static const std::set<char> valid_digits = {'1', '2', '3', '4', '5', '6', '7', '8'};
-        if(valid_chars.find(str_player_move[0]) != valid_chars.end())  // wenn "a,b, .., h" gelesen wird
-        {
+
+        if (valid_chars.find(str_player_move[0]) != valid_chars.end()) {
             move.set_col_CoordStart(dict_col_coords.at(str_player_move[0]));
-            str_player_move.erase(0,1);
-
-
+            str_player_move.erase(0, 1);
         }
-        if(valid_digits.find(str_player_move[0]) != valid_digits.end())  // wenn "1,2, ..., 8" gelesen wird
-        {
+        if (valid_digits.find(str_player_move[0]) != valid_digits.end()) {
             move.set_row_CoordStart(dict_row_coords.at(str_player_move[0]));
-            str_player_move.erase(0,1);
-
-
+            str_player_move.erase(0, 1);
         }
-        if(str_player_move[0] == 'x') {
-            str_player_move.erase(0,1);
-
-
+        if (str_player_move[0] == 'x') {
+            str_player_move.erase(0, 1);
         }
+
         move.set_col_CoordTarget(dict_col_coords.at(str_player_move[0]));
-
         move.set_row_CoordTarget(dict_row_coords.at(str_player_move[1]));
-        
     }
+
     move.setIsLegalMove(true);
     return move;
 }
