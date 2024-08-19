@@ -44,9 +44,6 @@ public:
     std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> active_pieces;
     std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> passive_pieces;
 
-    std::shared_ptr<std::tuple<int, int>> active_king_pos;
-    std::shared_ptr<std::tuple<int, int>> passive_king_pos;
-
     bool is_active_player_in_check;
     bool is_passive_player_in_check;
 
@@ -79,19 +76,18 @@ public:
     void print_board_state() const;
     bool consider_move(std::shared_ptr<Move> move);
     bool is_checkmate(
-        std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> attacking_pieces,
-        std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> defending_pieces);
+    );
     std::tuple<int, int> get_enpassant_option() { return en_passant_option; }
     void set_enpassant_option(int x, int y) {
         en_passant_option = std::make_tuple(x, y);
     }
-    int handle_turn(std::string& str_player_move);
-    bool is_own_king_in_check_after_move(
+    int handle_turn(const std::string &str_player_move);
+    bool is_king_in_check_after_move(
         const std::shared_ptr<Chess_Piece> piece_to_move,
         std::shared_ptr<Move> move,
-        const int8_t board_state[8][8]
+        const int8_t board_state[8][8], int kings_color
     );
-
+    bool is_stalemate();
     bool is_attack_diagonal(std::tuple<int, int> defending_king_pos, std::shared_ptr<Chess_Piece> attacking_piece) const;
     bool is_attack_vertical(std::tuple<int, int> defending_king_pos, std::shared_ptr<Chess_Piece> attacking_piece) const;
     bool is_attack_horizontal(std::tuple<int, int> defending_king_pos, std::shared_ptr<Chess_Piece> attacking_piece) const;
@@ -129,7 +125,7 @@ public:
     };
 
 
-std::vector<std::shared_ptr<Move>> get_available_moves(std::shared_ptr<Chess_Piece> piece);
+std::vector<std::shared_ptr<Move>> get_available_moves(std::shared_ptr<Chess_Piece> piece, int piece_owner);
 
 };
 #endif // BOARD_H

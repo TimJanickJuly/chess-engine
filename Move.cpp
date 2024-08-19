@@ -39,7 +39,8 @@ void Move::printMove() const {
               << "Difficult Move: " << is_difficult << "\n"
               << "Piece to Move: " << piece_to_move << "\n"
               << "Check: " << is_check << "\n"
-              << "Mate: " << is_mate << "\n";
+              << "Mate: " << is_mate << "\n"
+                << "e.p.: " << en_passant << "\n";
 }
 std::string Move::get_algebraic_chess() const {
 
@@ -149,83 +150,101 @@ bool Move::is_piece_move(const std::string& player_move) {
     return piece_names.find(player_move[0]) != std::string::npos;
 }
 
+bool Move::is_en_passant(const std::string& move) {
+    if (move.length() < 4) {
+        return false;
+    }
+    std::string lastFourChars = move.substr(move.length() - 4);
+
+    return lastFourChars == "e.p.";
+}
 
 
-Move Move::process_move_syntax(std::string& str_player_move) {
+Move Move::process_move_syntax(const std::string &str_player_move) {
     Move move = Move();
 
-    if (str_player_move.empty() || str_player_move.length() >= 7) {
+    std::string str_player_move_copy = str_player_move;
+
+    if (is_en_passant(str_player_move_copy)) {
+        str_player_move_copy.resize(str_player_move_copy.length() - 4);
+        move.en_passant = true;
+    }
+
+    if (str_player_move_copy.empty() || str_player_move_copy.length() >= 7) {
         return move;
     }
 
-    if (!is_legal_syntax_move(str_player_move)) {
+    if (!is_legal_syntax_move(str_player_move_copy)) {
         return move;
     }
 
-    if (str_player_move == "o-o" || str_player_move == "O-O") {
+    if (str_player_move_copy == "o-o" || str_player_move_copy == "O-O") {
         move.setIsCastlingMove("short");
         move.setIsLegalMove(true);
         return move;
     }
-    if (str_player_move == "o-o-o" || str_player_move == "O-O-O") {
+    if (str_player_move_copy == "o-o-o" || str_player_move_copy == "O-O-O") {
         move.setIsCastlingMove("long");
         move.setIsLegalMove(true);
         return move;
     }
 
-    if (str_player_move.back() == '#' || str_player_move.back() == '+') {
-        if (str_player_move.back() == '#') {
+    if (str_player_move_copy.back() == '#' || str_player_move_copy.back() == '+') {
+        if (str_player_move_copy.back() == '#') {
             move.setIsMate(true);
         } else {
             move.setIsCheck(true);
         }
-        str_player_move.pop_back();
+        str_player_move_copy.pop_back();
     }
 
-    if (is_difficult_move(str_player_move)) {
+    if (is_difficult_move(str_player_move_copy)) {
         move.setIsDifficultMove(true);
     } else {
         move.setIsDifficultMove(false);
     }
 
-    if (str_player_move.find('x') != std::string::npos) {
+    if (str_player_move_copy.find('x') != std::string::npos) {
         move.setIsCapturingMove(true);
     } else {
         move.setIsCapturingMove(false);
     }
 
-    if (is_piece_move(str_player_move)) {
-        move.setPieceToMove(str_player_move[0]);
-        str_player_move.erase(0, 1);
+    if (is_piece_move(str_player_move_copy)) {
+        move.setPieceToMove(str_player_move_copy[0]);
+        str_player_move_copy.erase(0, 1);
     } else {
         move.setPieceToMove('P');
     }
 
     if (!move.getIsDifficultMove()) {
-        if (str_player_move[0] == 'x') {
-            str_player_move.erase(0, 1);
+        if (str_player_move_copy[0] == 'x') {
+            str_player_move_copy.erase(0, 1);
         }
 
-        move.set_col_CoordTarget(dict_col_coords.at(str_player_move[0]));
-        move.set_row_CoordTarget(dict_row_coords.at(str_player_move[1]));
+        move.set_col_CoordTarget(dict_col_coords.at(str_player_move_copy[0]));
+        move.set_row_CoordTarget(dict_row_coords.at(str_player_move_copy[1]));
     } else if (move.getIsDifficultMove()) {
         static const std::set<char> valid_chars = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
         static const std::set<char> valid_digits = {'1', '2', '3', '4', '5', '6', '7', '8'};
 
-        if (valid_chars.find(str_player_move[0]) != valid_chars.end()) {
-            move.set_col_CoordStart(dict_col_coords.at(str_player_move[0]));
-            str_player_move.erase(0, 1);
+        if (valid_chars.find(str_player_move_copy[0]) != valid_chars.end()) {
+            move.set_col_CoordStart(dict_col_coords.at(str_player_move_copy[0]));
+            str_player_move_copy.erase(0, 1);
         }
-        if (valid_digits.find(str_player_move[0]) != valid_digits.end()) {
-            move.set_row_CoordStart(dict_row_coords.at(str_player_move[0]));
-            str_player_move.erase(0, 1);
+        if (valid_digits.find(str_player_move_copy[0]) != valid_digits.end()) {
+            move.set_row_CoordStart(dict_row_coords.at(str_player_move_copy[0]));
+            str_player_move_copy.erase(0, 1);
         }
-        if (str_player_move[0] == 'x') {
-            str_player_move.erase(0, 1);
+        if (str_player_move_copy[0] == 'x') {
+            str_player_move_copy.erase(0, 1);
         }
 
-        move.set_col_CoordTarget(dict_col_coords.at(str_player_move[0]));
-        move.set_row_CoordTarget(dict_row_coords.at(str_player_move[1]));
+        move.set_col_CoordTarget(dict_col_coords.at(str_player_move_copy[0]));
+        move.set_row_CoordTarget(dict_row_coords.at(str_player_move_copy[1]));
+    }
+    if (move.en_passant && move.getPieceToMove() != 'P') {
+        return move;
     }
 
     move.setIsLegalMove(true);
