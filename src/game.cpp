@@ -1036,6 +1036,7 @@ bool Game::is_stalemate() {
         }
         return true;
     }
+    return false;
 }
 
 
