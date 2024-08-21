@@ -11,6 +11,7 @@
 #include "move.h"
 #include "Chess_Piece.h"
 #include <cstdint>
+#include <list>
 #include <utility>
 using Coordinates = std::tuple<int, int>;
 
@@ -55,9 +56,13 @@ public:
     bool has_black_a_rook_moved;
     bool has_black_h_rook_moved;
 
-
-   std::shared_ptr<std::tuple<int,int>> capture_coords;
+    std::string game_state;
+    int num_moves_played;
+    std::shared_ptr<std::tuple<int,int>> masked_coords;
     std::shared_ptr<std::tuple<int,int>> en_passant_coords;
+    bool en_passant_option;
+
+    std::string last_move_status;
 
     bool check_castle(char castle_type);
     std::vector<std::shared_ptr<Chess_Piece>> find_moving_piece_candidates(std::shared_ptr<Move> move);
@@ -65,7 +70,6 @@ public:
     static std::unordered_map<int, std::string> valueToPiece;
     static std::unordered_map<std::string, int> pieceToValue;
     std::shared_ptr<Chess_Piece> create_piece(int val, int row_coord, int col_coord);
-    std::tuple<int, int> en_passant_option;
     void execute_move(std::shared_ptr<Chess_Piece> piece, std::shared_ptr<Move> move);
     void execute_castle(char castle_type);
     bool is_square_attacked(const std::tuple<int, int> &square,
@@ -77,15 +81,11 @@ public:
     bool consider_move(std::shared_ptr<Move> move);
     bool is_checkmate(
     );
-    std::tuple<int, int> get_enpassant_option() { return en_passant_option; }
-    void set_enpassant_option(int x, int y) {
-        en_passant_option = std::make_tuple(x, y);
-    }
     int handle_turn(const std::string &str_player_move);
-    bool is_king_in_check_after_move(
+    bool is_own_king_in_check_after_move(
         const std::shared_ptr<Chess_Piece> piece_to_move,
         std::shared_ptr<Move> move,
-        const int8_t board_state[8][8], int kings_color
+        const int8_t board_state[8][8]
     );
     bool is_stalemate();
     bool is_attack_diagonal(std::tuple<int, int> defending_king_pos, std::shared_ptr<Chess_Piece> attacking_piece) const;
@@ -93,25 +93,34 @@ public:
     bool is_attack_horizontal(std::tuple<int, int> defending_king_pos, std::shared_ptr<Chess_Piece> attacking_piece) const;
     void clean_up_after_turn();
     std::vector<std::tuple<int, int>> compute_block_squares_diag(
-    const std::tuple<int, int>& defending_king_pos,
-    int attacking_piece_row,
-    int attacking_piece_col,
-    const std::vector<std::tuple<int, int>>& blockable_squares
-)const;
+        const std::tuple<int, int>& defending_king_pos,
+        int attacking_piece_row,
+        int attacking_piece_col
+    )const;
     std::vector<std::tuple<int, int>> compute_block_squares_vertical(
         const std::tuple<int, int>& defending_king_pos,
         int attacking_piece_row,
-        int attacking_piece_col,
-        const std::vector<std::tuple<int, int>>& blockable_squares
+        int attacking_piece_col
     ) const;
     std::vector<std::tuple<int, int>> compute_block_squares_horizontal(
         const std::tuple<int, int>& defending_king_pos,
         int attacking_piece_row,
-        int attacking_piece_col,
-        const std::vector<std::tuple<int, int>>& blockable_squares
+        int attacking_piece_col
     ) const;
     void switchPlayer();
     void print_history();
+    bool is_opponents_king_move_legal(
+    const std::shared_ptr<Chess_Piece> defending_king_ptr,
+    const int8_t board_state[8][8], int new_row_king, int new_col_king);
+
+    bool is_opponents_move_legal(
+    const std::shared_ptr<Chess_Piece> piece_to_move_ptr,
+    const int8_t board_state[8][8],
+    int new_row,
+    int new_col
+
+
+);
 
     int8_t board_state[8][8] = {
         {WR, WN, WB, WQ, WK, WB, WN, WR},
@@ -125,7 +134,9 @@ public:
     };
 
 
-std::vector<std::shared_ptr<Move>> get_available_moves(std::shared_ptr<Chess_Piece> piece, int piece_owner);
-
+    std::vector<std::shared_ptr<Move>> get_available_moves(std::shared_ptr<Chess_Piece> piece, int piece_owner);
+    std::list<std::vector<std::shared_ptr<Move>>> get_all_available_moves();
+    bool has_piece_available_move(std::shared_ptr<Chess_Piece> piece, int piece_owner);
+    void promote_pawn(std::shared_ptr<Chess_Piece>piece_ptr, char promotion_type);
 };
 #endif // BOARD_H

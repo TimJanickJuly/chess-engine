@@ -25,12 +25,13 @@ public:
     bool is_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const;
     bool is_pawn_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const;
     bool is_knight_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const;
-    bool is_bishop_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const;
-    bool is_rook_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const;
-    bool is_queen_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const;
+    bool is_bishop_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const;
+    bool is_rook_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const;
+    bool is_queen_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const;
     bool is_king_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const;
-    bool is_target_valid(const int8_t board[8][8], int target_row, int target_col, int piece_color, bool is_capture) const;
+    bool is_target_valid(const int8_t board[8][8], int target_row, int target_col, int piece_color, bool is_capture, bool is_defense) const;
     bool is_path_clear(const int8_t board[8][8], int start_row, int start_col, int end_row, int end_col) const ;
+    bool is_en_passant_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const;
 
     std::vector<std::tuple<int, int>> get_available_coords_to_move_to(int active_player, const int8_t board_state[8][8]);
 private:

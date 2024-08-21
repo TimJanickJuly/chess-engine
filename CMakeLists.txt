@@ -12,5 +12,7 @@ add_executable(chess main.cpp
         Move.cpp
         Chess_Piece.cpp
         Chess_Piece.h
+        test.h
+        test.cpp
 
 )

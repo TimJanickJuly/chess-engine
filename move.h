@@ -10,11 +10,11 @@ public:
     Move(bool is_legal_move = false, int row_start = -1, int col_start = -1,
          int row_target = 0, int col_target = 0,
          std::string is_castling_move = "None", bool is_capture = false, bool is_difficult = false,
-         char piece_to_move = 'X', bool is_check = false, bool is_mate = false, bool en_passant = false)
+         char piece_to_move = 'X', bool is_check = false, bool is_mate = false, bool en_passant = false, bool promotion = false, char promotion_t = 'X')
         : is_legal_move(is_legal_move), row_start(row_start), col_start(col_start),
           row_target(row_target), col_target(col_target),
           is_castling_move(is_castling_move), is_capture(is_capture), is_difficult(is_difficult),
-          piece_to_move(piece_to_move), is_check(is_check), is_mate(is_mate), en_passant(en_passant) {}
+          piece_to_move(piece_to_move), is_check(is_check), is_mate(is_mate), en_passant(en_passant), is_promotion(promotion), promotion_type(promotion_t) {}
 
 
     // Getter-Methoden
@@ -44,9 +44,13 @@ public:
     void setIsMate(bool mate);
     void printMove() const;
 
-    static std::unordered_map<char, int> dict_row_coords;
-    static std::unordered_map<char, int> dict_col_coords;
-    std::string get_algebraic_chess() const;
+    static std::unordered_map<char, int> dict_col_char_to_coord;
+    static std::unordered_map<char, int> dict_row_char_to_coord;
+
+    static std::unordered_map<int, char> dict_col_coord_to_char;
+    static std::unordered_map<int, char> dict_row_coord_to_char;
+
+    std::string get_algebraic_chess_notation() const;
 
 
     static Move process_move_syntax(const std::string &str_player_move);
@@ -56,6 +60,7 @@ public:
     static bool is_legal_syntax_move(const std::string& input);
     static bool is_piece_move(const std::string& player_move);
     static bool is_en_passant(const std::string& move);
+    static bool is_promotion_syntax(const std::string& input);
 public:
     bool is_legal_move;
     int row_start;
@@ -69,6 +74,9 @@ public:
     bool is_check;
     bool is_mate;
     bool en_passant;
+    bool is_promotion;
+    char promotion_type;
+
 };
 
 #endif // MOVE_H
