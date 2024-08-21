@@ -13,6 +13,8 @@
 #include <cstdint>
 #include <list>
 #include <utility>
+#include "BoardHashMap.h"
+
 using Coordinates = std::tuple<int, int>;
 
 #define EE 0
@@ -33,7 +35,7 @@ class Game : public std::enable_shared_from_this<Game> {
 public:
 
     std::vector<std::string> game_history_str;
-
+    BoardHashMap game_history_hash_map;
     int active_player;
 
     std::tuple<int, int> white_king_pos;

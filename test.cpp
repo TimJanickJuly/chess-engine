@@ -79,5 +79,8 @@ Test::Test() {
     std::vector<std::string>{ "a3", "h5", "f4", "h4", "g4", "hxg3 e.p.", "a4", "e6", "a5", "gxh2", "a6", "hxg1=Q", "axb7", "Qg3#"},
     "black wins");
 
-
+    test_data_vector.emplace_back(
+"draw by repetition",
+std::vector<std::string>{ "Nf3", "Nf6", "Ng1", "Ng8", "Nf3", "Nf6", "Ng1", "Ng8", "Nf3", "Nf6", "Ng1", "Ng8"},
+"draw");
 }

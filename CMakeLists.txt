@@ -14,5 +14,7 @@ add_executable(chess main.cpp
         Chess_Piece.h
         test.h
         test.cpp
+        BoardHashMap.cpp
+        BoardHashMap.h
 
 )

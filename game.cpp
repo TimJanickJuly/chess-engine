@@ -11,6 +11,8 @@
 #include "Chess_Piece.h"
 #include <cassert>
 #include <list>
+#include "BoardHashMap.h"
+
 
 std::unordered_map<int, std::string> Game::valueToPiece = {
     {EE, ".."},
@@ -76,6 +78,11 @@ int Game::handle_turn(const std::string &str_player_move) {
             if(is_stalemate()){
                 last_move_status = "Stalemate Detected\n";
                 game_state = "stalemate";
+                return 0;
+            }
+            if(!game_history_hash_map.memorize_board_state(board_state)) {
+                last_move_status = "Draw by repetition detected\n";
+                game_state = "draw";
                 return 0;
             }
         }
@@ -414,6 +421,8 @@ void Game::execute_move(std::shared_ptr<Chess_Piece> piece, std::shared_ptr<Move
 
     // If a piece has to be captured, then remove it for the piece list
     if (board_state[move->row_target][move->col_target] != 0) {
+        //game_history_hash_map.clear_hashmap_history();  // hashmap can be cleared because board_state repetion is impossible after a piece has been captured
+
         std::vector<std::shared_ptr<Chess_Piece>>* opponent_pieces = (active_player > 0) ? &black_pieces : &white_pieces;
 
         auto it = std::find_if(opponent_pieces->begin(), opponent_pieces->end(), [&](const std::shared_ptr<Chess_Piece>& p) {
