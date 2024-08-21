@@ -2,7 +2,7 @@
 #include <iostream>
 #include <memory> // Für std::shared_ptr
 #include <vector>
-#include "game.h"
+#include "src/game.h"
 #include <iostream>
 #include <memory> // Für std::shared_ptr
 #include "test.h"

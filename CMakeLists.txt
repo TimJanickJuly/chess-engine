@@ -3,18 +3,18 @@ project(chess)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+
 add_executable(chess main.cpp
-        game.cpp
-        game.h
-        tmp.cpp
-        tmp.h
-        move.h
-        Move.cpp
-        Chess_Piece.cpp
-        Chess_Piece.h
+        src/game.cpp
+        src/game.h
+        src/move.h
+        src/Move.cpp
+        src/Chess_Piece.cpp
+        src/Chess_Piece.h
         test.h
         test.cpp
-        BoardHashMap.cpp
-        BoardHashMap.h
+        src/BoardHashMap.cpp
+        src/BoardHashMap.h
 
 )

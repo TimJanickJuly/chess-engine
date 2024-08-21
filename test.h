@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include "game.h"
+#include "src/game.h"
 
 // Definition der struct Test_Data
 struct Test_Data {
