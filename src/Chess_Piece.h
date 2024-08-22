@@ -33,7 +33,8 @@ public:
     bool is_path_clear(const int8_t board[8][8], int start_row, int start_col, int end_row, int end_col) const ;
     bool is_en_passant_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const;
 
-    std::vector<std::tuple<int, int>> get_available_coords_to_move_to(int active_player, const int8_t board_state[8][8]);
+    std::vector<std::tuple<int, int, bool>> get_available_coords_to_move_to(
+    int active_player, const int8_t board_state[8][8]);
 private:
     int x_coord;
     int y_coord;

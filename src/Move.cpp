@@ -5,8 +5,8 @@
 
 // Getter-Methoden
 bool Move::getIsLegalMove() const { return is_legal_move; }
-int Move::get_row_CoordStart() const { return col_start; }
-int Move::get_col_CoordStart() const { return row_start; }
+int Move::get_row_CoordStart() const { return row_start; }
+int Move::get_col_CoordStart() const { return col_start; }
 int Move::get_row_CoordTarget() const { return row_target; }
 int Move::get_col_CoordTarget() const { return col_target; }
 std::string Move::getIsCastlingMove() const { return is_castling_move; }

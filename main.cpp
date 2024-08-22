@@ -43,8 +43,8 @@ int main(int argc, char* argv[]) {
                 auto list_of_available_moves = board->get_all_available_moves();
                 for (const auto& vector : list_of_available_moves) {
                     if (!vector.empty()) {
-                        int col_start = vector.at(0)->get_col_CoordStart();
-                        int row_start = vector.at(0)->get_row_CoordStart();
+                        int col_start = vector.at(0)->col_start;
+                        int row_start = vector.at(0)->row_start;
 
                         auto col_it = Move::dict_col_coord_to_char.find(col_start);
                         auto row_it = Move::dict_row_coord_to_char.find(row_start);

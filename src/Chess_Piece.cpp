@@ -185,29 +185,39 @@ bool Chess_Piece::is_bishop_move_possible(const int8_t board[8][8], int target_c
     return is_path_clear(board, row_start, col_start, target_coord_row, target_coord_col);
 }
 
-std::vector<std::tuple<int, int>> Chess_Piece::get_available_coords_to_move_to(int active_player, const int8_t board_state[8][8]) {
+std::vector<std::tuple<int, int, bool>> Chess_Piece::get_available_coords_to_move_to(
+    int active_player, const int8_t board_state[8][8]) {
 
-    std::vector<std::tuple<int, int>> koord_candidates;
+    std::vector<std::tuple<int, int, bool>> koord_candidates_and_is_capture;
     switch (getPieceType()) {
         case 'P': {
             int starting_row = (active_player > 0) ? 1 : 6;
             int direction = (active_player > 0) ? 1 : -1;
             if (get_row() == starting_row) {
                 if (is_move_possible(board_state, get_row() + 2 * direction, get_col(), false, false)) {
-                    koord_candidates.push_back(std::make_tuple(get_row() + 2 * direction, get_col()));
+                    koord_candidates_and_is_capture.push_back(std::make_tuple(get_row() + 2 * direction, get_col(), false));
                 }
             }
             if (is_move_possible(board_state, get_row() + 1 * direction, get_col(), false, false)) {
-                koord_candidates.push_back(std::make_tuple(get_row() + 1 * direction, get_col()));
+                koord_candidates_and_is_capture.push_back(std::make_tuple(get_row() + 1 * direction, get_col(), false));
             }
 
 
             if (is_move_possible(board_state, get_row() + 1 * direction, get_col() + 1, true, false)) {
-                koord_candidates.push_back(std::make_tuple(get_row() + 1 * direction, get_col() + 1));
+                koord_candidates_and_is_capture.push_back(std::make_tuple(get_row() + 1 * direction, get_col() + 1, true));
             }
             if (is_move_possible(board_state, get_row() + 1 * direction, get_col() - 1, true, false)) {
-                koord_candidates.push_back(std::make_tuple(get_row() + 1 * direction, get_col() - 1));
+                koord_candidates_and_is_capture.push_back(std::make_tuple(get_row() + 1 * direction, get_col() - 1, true));
             }
+
+            // en passant
+            if (is_en_passant_possible(board_state, get_row() + 1 * direction, get_col() + 1, true, false)) {
+                koord_candidates_and_is_capture.push_back(std::make_tuple(get_row() + 1 * direction, get_col() + 1, true));
+            }
+            if (is_en_passant_possible(board_state, get_row() + 1 * direction, get_col() - 1, true, false)) {
+                koord_candidates_and_is_capture.push_back(std::make_tuple(get_row() + 1 * direction, get_col() - 1, true));
+            }
+
             break;
         }
         case 'N': {
@@ -227,7 +237,7 @@ std::vector<std::tuple<int, int>> Chess_Piece::get_available_coords_to_move_to(i
 
                 if (new_row >= 0 && new_row < 8 && new_col >= 0 && new_col < 8) {
                     if (is_move_possible(board_state, new_row, new_col, true, false)) {
-                        koord_candidates.push_back(std::make_tuple(new_row, new_col));
+                        koord_candidates_and_is_capture.push_back(std::make_tuple(new_row, new_col, (board_state[new_row][new_col] != 0)));
                     }
                 }
             }
@@ -247,7 +257,7 @@ std::vector<std::tuple<int, int>> Chess_Piece::get_available_coords_to_move_to(i
 
                 while (new_row >= 0 && new_row < 8 && new_col >= 0 && new_col < 8) {
                     if (is_move_possible(board_state, new_row, new_col, true, false)) {
-                        koord_candidates.push_back(std::make_tuple(new_row, new_col));
+                        koord_candidates_and_is_capture.push_back(std::make_tuple(new_row, new_col, (board_state[new_row][new_col] != 0)));
                         if (board_state[new_row][new_col] != 0) {
                             break; // Stop if there is a piece on the square
                         }
@@ -275,7 +285,7 @@ std::vector<std::tuple<int, int>> Chess_Piece::get_available_coords_to_move_to(i
 
                 while (new_row >= 0 && new_row < 8 && new_col >= 0 && new_col < 8) {
                     if (is_move_possible(board_state, new_row, new_col, true, false)) {
-                        koord_candidates.push_back(std::make_tuple(new_row, new_col));
+                        koord_candidates_and_is_capture.push_back(std::make_tuple(new_row, new_col, (board_state[new_row][new_col] != 0)));
                         if (board_state[new_row][new_col] != 0) {
                             break; // Stop if there is a piece on the square
                         }
@@ -304,7 +314,7 @@ std::vector<std::tuple<int, int>> Chess_Piece::get_available_coords_to_move_to(i
 
                 while (new_row >= 0 && new_row < 8 && new_col >= 0 && new_col < 8) {
                     if (is_move_possible(board_state, new_row, new_col, false, false)) {
-                        koord_candidates.push_back(std::make_tuple(new_row, new_col));
+                        koord_candidates_and_is_capture.push_back(std::make_tuple(new_row, new_col, (board_state[new_row][new_col] != 0)));
                         if (board_state[new_row][new_col] != 0) {
                             break; // Stop if there is a piece on the square
                         }
@@ -329,7 +339,7 @@ std::vector<std::tuple<int, int>> Chess_Piece::get_available_coords_to_move_to(i
 
                 while (new_row >= 0 && new_row < 8 && new_col >= 0 && new_col < 8) {
                     if (is_move_possible(board_state, new_row, new_col, true, false)) {
-                        koord_candidates.push_back(std::make_tuple(new_row, new_col));
+                        koord_candidates_and_is_capture.push_back(std::make_tuple(new_row, new_col, (board_state[new_row][new_col] != 0)));
                         if (board_state[new_row][new_col] != 0) {
                             break; // Stop if there is a piece on the square
                         }
@@ -359,15 +369,15 @@ std::vector<std::tuple<int, int>> Chess_Piece::get_available_coords_to_move_to(i
 
                 if (new_row >= 0 && new_row < 8 && new_col >= 0 && new_col < 8) {
                     if (is_move_possible(board_state, new_row, new_col, true, false)) {
-                        koord_candidates.push_back(std::make_tuple(new_row, new_col));
+                        koord_candidates_and_is_capture.push_back(std::make_tuple(new_row, new_col, (board_state[new_row][new_col] != 0)));
                     }
                 }
             }
-            
+
             break;
         }
     }
-    return koord_candidates;
+    return koord_candidates_and_is_capture;
 }
 
 

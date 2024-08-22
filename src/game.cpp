@@ -14,90 +14,86 @@
 #include "BoardHashMap.h"
 
 
-std::unordered_map<int, std::string> Game::valueToPiece = {
-    {EE, ".."},
-    {BK, "BK"},
-    {BQ, "BQ"},
-    {BB, "BB"},
-    {BN, "BN"},
-    {BR, "BR"},
-    {BP, "BP"},
-    {WK, "WK"},
-    {WQ, "WQ"},
-    {WB, "WB"},
-    {WN, "WN"},
-    {WR, "WR"},
-    {WP, "WP"}
-};
-
-std::unordered_map<std::string, int> Game::pieceToValue = {
-    {"EMPTY", EE},
-    {"BK", BK},
-    {"BQ", BQ},
-    {"BB", BB},
-    {"BN", BN},
-    {"BR", BR},
-    {"BP", BP},
-    {"WK", WK},
-    {"WQ", WQ},
-    {"WB", WB},
-    {"WN", WN},
-    {"WR", WR},
-    {"WP", WP}
-};
-
-
 
 int Game::handle_turn(const std::string &str_player_move) {
     std::shared_ptr<Move> move = std::make_shared<Move>(Move::process_move_syntax(str_player_move));
     if (!move->is_legal_move) {
         return 1;
     }
-    if (!consider_move(move)){
+    if (!consider_move(move)){ // tests if move is legal: if true: move was executed, if false: move was rejected
         return -1;
     }
-        if(is_passive_player_in_check) {
-            if (active_player > 0) {
-                last_move_status = "Black has been put under check\n";
-            }else {
-                last_move_status = "White has been put under check\n";
-            }
-            if(is_checkmate()) {
-                last_move_status = "Checkmate Detected\n";
-                move->is_mate = true;
-                if(active_player > 0) {
-                    game_state = "white wins";
-                }
-                else {
-                    game_state = "black wins";
-                }
-                return 0;
-            }
-            }
-        else {
-            if(is_stalemate()){
-                last_move_status = "Stalemate Detected\n";
-                game_state = "stalemate";
-                return 0;
-            }
-            if(!game_history_hash_map.memorize_board_state(board_state)) {
-                last_move_status = "Draw by repetition detected\n";
-                game_state = "draw";
-                return 0;
-            }
+    if(is_passive_player_in_check) {
+        if (active_player > 0) {
+            last_move_status = "Black has been put under check\n";
+        }else {
+            last_move_status = "White has been put under check\n";
         }
-        clean_up_after_turn();
-        switchPlayer();
-        num_moves_played += 1;
-        game_history_str.push_back(move->get_algebraic_chess_notation());
-        return 2;
+        if(is_checkmate()) {
+            last_move_status = "Checkmate Detected\n";
+            move->is_mate = true;
+            if(active_player > 0) {
+                game_state = "white wins";
+            }
+            else {
+                game_state = "black wins";
+            }
+            return 0;
+        }
     }
+    else {
+        if(is_stalemate()){
+            last_move_status = "Stalemate Detected\n";
+            game_state = "stalemate";
+            return 0;
+        }
+        // to test if the same boardstate has occured for the 3rd time, each boardstate is stored in a hashmap with an ocurrence counter
+        if(!game_history_hash_map.memorize_board_state(board_state)) {
+            last_move_status = "Draw by repetition detected\n";
+            game_state = "draw";
+            return 0;
+        }
+    }
+    clean_up_after_turn();
+    switchPlayer();
+    num_moves_played += 1;
+    game_history_str.push_back(move->get_algebraic_chess_notation());
+    return 2;
+}
 
 
 void Game::switchPlayer() {
     active_player *= -1;
     std::swap(active_pieces, passive_pieces);
 }
+
+void Game::clean_up_after_turn() {
+    masked_coords = std::make_shared<std::tuple<int,int>>(-1,-1);
+
+    if(!en_passant_option) {
+        en_passant_coords= std::make_shared<std::tuple<int,int>>(-1,-1);
+        en_passant_option = false;
+    }
+
+    if (board_state[std::get<0>(white_king_pos)][std::get<1>(white_king_pos)] != 10) {
+        for (const auto& piece : white_pieces) {
+            if(piece->getPieceType() == 'K') {
+                white_king_pos = std::make_tuple(piece->get_row(), piece->get_col());
+            }
+        }
+    }
+    if (board_state[std::get<0>(black_king_pos)][std::get<1>(black_king_pos)] != -10) {
+        for (const auto& piece : black_pieces) {
+            if(piece->getPieceType() == 'K') {
+                white_king_pos = std::make_tuple(piece->get_row(), piece->get_col());
+            }
+        }
+    }
+
+    active_pieces = (active_player > 0) ? std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(white_pieces) :std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(black_pieces);
+    passive_pieces = (active_player > 0) ? std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(black_pieces) :std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(white_pieces);
+}
+
 
 bool Game::consider_move(std::shared_ptr<Move> move) {
     std::cout << "Your entered move:\n";
@@ -215,7 +211,6 @@ bool Game::consider_move(std::shared_ptr<Move> move) {
 
     execute_move(piece_to_move_ptr, move);                                                      /// <- Move is executed here
 
-
     if(move->is_promotion) {
         promote_pawn(piece_to_move_ptr, move->promotion_type);
     }
@@ -289,7 +284,6 @@ bool Game::is_opponents_king_move_legal(
     const std::shared_ptr<Chess_Piece> defending_king_ptr,
     const int8_t board_state[8][8], int new_row_king, int new_col_king
 ) {
-
     auto attacking_pieces = active_pieces;
     auto defending_king_pos = (active_player > 0)? black_king_pos : white_king_pos;
 
@@ -447,35 +441,6 @@ void Game::execute_move(std::shared_ptr<Chess_Piece> piece, std::shared_ptr<Move
             opponent_pieces->erase(it);
         }
     }
-}
-
-
-
-void Game::clean_up_after_turn() {
-    masked_coords = std::make_shared<std::tuple<int,int>>(-1,-1);
-
-    if(!en_passant_option) {
-        en_passant_coords= std::make_shared<std::tuple<int,int>>(-1,-1);
-        en_passant_option = false;
-    }
-
-    if (board_state[std::get<0>(white_king_pos)][std::get<1>(white_king_pos)] != 10) {
-        for (const auto& piece : white_pieces) {
-            if(piece->getPieceType() == 'K') {
-                white_king_pos = std::make_tuple(piece->get_row(), piece->get_col());
-            }
-        }
-    }
-    if (board_state[std::get<0>(black_king_pos)][std::get<1>(black_king_pos)] != -10) {
-        for (const auto& piece : black_pieces) {
-            if(piece->getPieceType() == 'K') {
-                white_king_pos = std::make_tuple(piece->get_row(), piece->get_col());
-            }
-        }
-    }
-
-    active_pieces = (active_player > 0) ? std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(white_pieces) :std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(black_pieces);
-    passive_pieces = (active_player > 0) ? std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(black_pieces) :std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(white_pieces);
 }
 
 Game::Game() {
@@ -795,6 +760,48 @@ bool Game::is_checkmate(
     return true; // Schachmatt
 }
 
+
+bool Game::is_stalemate() {
+    if(num_moves_played < 20) {
+        return false;
+    }
+
+    auto defensive_pieces = (active_player > 0)  ? std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(black_pieces) : std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(white_pieces);
+
+    for (std::shared_ptr<Chess_Piece> piece : *defensive_pieces) {
+        if (piece->getPieceType() =='Q') {
+            for(int row = -1; row <= 1; row++) {
+                for(int col = -1; col <= 1; col++) {
+                    int new_queen_row = piece->get_row() + row;
+                    int new_queen_col = piece->get_row() + col;
+                    if(new_queen_row >= 0 && new_queen_row <8 && new_queen_col >= 0 && new_queen_row < 8) {
+                        if(board_state[new_queen_row][new_queen_col] == 0) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    int piece_owner = (active_player > 0) ? -1 : 1;
+    std::shared_ptr<Chess_Piece> defending_king_ptr;
+    for (const auto& piece : *defensive_pieces) {
+        if (piece->getPieceType() == 'K'){
+            defending_king_ptr = piece;
+        }
+    }
+
+    for (const auto& piece : *defensive_pieces) {
+        if (has_piece_available_move(piece, piece_owner)){
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+
 void Game::promote_pawn(std::shared_ptr<Chess_Piece>piece_ptr, char promotion_type) {
     piece_ptr->setPieceType(promotion_type);
 
@@ -890,6 +897,105 @@ std::vector<std::tuple<int, int>> Game::compute_block_squares_vertical(
 }
 
 
+std::shared_ptr<Chess_Piece> Game::create_piece(int val, int row_coord, int col_coord) {
+    std::shared_ptr<Chess_Piece> piece;
+
+    std::string color = (val > 0) ? "white" : "black";
+
+    // Erstelle das Piece basierend auf dem Wert
+    switch (std::abs(val)) {
+        case 1:
+            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color,'P');
+        break;
+        case 3:
+            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color,'N');
+        break;
+        case 4:
+            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color, 'B');
+        break;
+        case 5:
+            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color, 'R');
+        break;
+        case 9:
+            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color, 'Q');
+        break;
+
+        case 10: // King
+            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color, 'K');
+        break;
+        case 0:
+            break;
+        // Weitere Fälle für andere Schachfiguren wie Rook, Knight, Bishop, King...
+        default:
+            throw std::invalid_argument("Unbekannter Wert für Schachfigur");
+    }
+
+    return piece;
+}
+
+
+std::vector<std::shared_ptr<Move>> Game::get_available_moves(std::shared_ptr<Chess_Piece> piece, int piece_owner) {
+
+    std::vector<std::shared_ptr<Move>> available_moves;
+    std::vector<std::tuple<int, int, bool>> move_candidates = piece->get_available_coords_to_move_to(piece_owner, board_state);
+    for (const auto& move_candidate : move_candidates) {
+        int row = std::get<0>(move_candidate);
+        int col = std::get<1>(move_candidate);
+        bool capture = std::get<2>(move_candidate);
+        auto move = std::make_shared<Move>(Move(true, piece->get_row(), piece->get_col(), row, col, "", capture, false, piece->getPieceType()));
+        if (piece->getPieceType() != 'K' && is_opponents_move_legal(piece, board_state, row,col)) {
+            available_moves.push_back(move);
+        }
+        else if(piece->getPieceType() == 'K' && is_opponents_king_move_legal(piece, board_state, row, col)) {
+            available_moves.push_back(move);
+        }
+    }
+
+    if(piece->getPieceType() == 'K') {
+        if (check_castle('s')) {
+            auto move = std::make_shared<Move>(Move(true, piece->get_row(), piece->get_col(), -1, -1, "short", false, false,'x'));
+            available_moves.push_back(move);
+        }
+        if (check_castle('l')) {
+            auto move = std::make_shared<Move>(Move(true, piece->get_row(), piece->get_col(), -1, -1, "long", false, false,'x'));
+            available_moves.push_back(move);
+        }
+    }
+
+    return available_moves;
+}
+
+
+bool Game::has_piece_available_move(std::shared_ptr<Chess_Piece> piece, int piece_owner) {
+    std::vector<std::tuple<int, int, bool>> coord_candidates = piece->get_available_coords_to_move_to(piece_owner, board_state);
+    for (const auto& coord : coord_candidates) {
+        int row = std::get<0>(coord);
+        int col = std::get<1>(coord);
+        auto move = std::make_shared<Move>(Move(true, piece->get_row(), piece->get_col(), row, col, "", (board_state[row][col] != 0), true, piece->getPieceType()));
+        if (piece->getPieceType() != 'K' && is_opponents_move_legal(piece, board_state, row,col)) {
+            return true;
+        }
+        if(piece->getPieceType() == 'K' && is_opponents_king_move_legal(piece, board_state, row, col)) {
+            return true;
+        }
+    }
+return false;
+}
+
+std::list<std::vector<std::shared_ptr<Move>>> Game::get_all_available_moves() {
+    auto active_pieces = (active_player > 0) ? white_pieces : black_pieces;
+
+    std::list<std::vector<std::shared_ptr<Move>>> available_moves;
+
+    for (auto piece : active_pieces) {
+        available_moves.push_back(get_available_moves(piece, active_player));
+    }
+    return available_moves;
+}
+
+
+
+
 void Game::print_board_state() const {
     const int cell_width = 3;
 
@@ -945,42 +1051,6 @@ void Game::print_pieces_debug() {
     std::cout << "\n";
 }
 
-std::shared_ptr<Chess_Piece> Game::create_piece(int val, int row_coord, int col_coord) {
-    std::shared_ptr<Chess_Piece> piece;
-
-    std::string color = (val > 0) ? "white" : "black";
-
-    // Erstelle das Piece basierend auf dem Wert
-    switch (std::abs(val)) {
-        case 1:
-            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color,'P');
-        break;
-        case 3:
-            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color,'N');
-        break;
-        case 4:
-            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color, 'B');
-        break;
-        case 5:
-            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color, 'R');
-        break;
-        case 9:
-            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color, 'Q');
-        break;
-
-        case 10: // King
-            piece = std::make_shared<Chess_Piece>(row_coord, col_coord, color, 'K');
-        break;
-        case 0:
-            break;
-        // Weitere Fälle für andere Schachfiguren wie Rook, Knight, Bishop, King...
-        default:
-            throw std::invalid_argument("Unbekannter Wert für Schachfigur");
-    }
-
-    return piece;
-}
-
 void Game::print_history() {
     int move_number = 1;
     std::cout << "Game History: \n";
@@ -1000,101 +1070,34 @@ void Game::print_history() {
     }
 }
 
-bool Game::is_stalemate() {
-    if(num_moves_played < 20) {
-        return false;
-    }
+std::unordered_map<int, std::string> Game::valueToPiece = {
+    {EE, ".."},
+    {BK, "BK"},
+    {BQ, "BQ"},
+    {BB, "BB"},
+    {BN, "BN"},
+    {BR, "BR"},
+    {BP, "BP"},
+    {WK, "WK"},
+    {WQ, "WQ"},
+    {WB, "WB"},
+    {WN, "WN"},
+    {WR, "WR"},
+    {WP, "WP"}
+};
 
-    auto defensive_pieces = (active_player > 0)  ? std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(black_pieces) : std::make_shared<std::vector<std::shared_ptr<Chess_Piece>>>(white_pieces);
-
-    for (std::shared_ptr<Chess_Piece> piece : *defensive_pieces) {
-        if (piece->getPieceType() =='Q') {
-            for(int row = -1; row <= 1; row++) {
-                for(int col = -1; col <= 1; col++) {
-                    int new_queen_row = piece->get_row() + row;
-                    int new_queen_col = piece->get_row() + col;
-                    if(new_queen_row >= 0 && new_queen_row <8 && new_queen_col >= 0 && new_queen_row < 8) {
-                        if(board_state[new_queen_row][new_queen_col] == 0) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    int piece_owner = (active_player > 0) ? -1 : 1;
-    std::shared_ptr<Chess_Piece> defending_king_ptr;
-    for (const auto& piece : *defensive_pieces) {
-        if (piece->getPieceType() == 'K'){
-            defending_king_ptr = piece;
-        }
-    }
-
-    for (const auto& piece : *defensive_pieces) {
-        if (has_piece_available_move(piece, piece_owner)){
-            return false;
-        }
-        return true;
-    }
-    return false;
-}
-
-
-std::vector<std::shared_ptr<Move>> Game::get_available_moves(std::shared_ptr<Chess_Piece> piece, int piece_owner) {
-
-    std::vector<std::shared_ptr<Move>> available_moves;
-    std::vector<std::tuple<int, int>> coord_candidates = piece->get_available_coords_to_move_to(piece_owner, board_state);
-    for (const auto& coord : coord_candidates) {
-        int row = std::get<0>(coord);
-        int col = std::get<1>(coord);
-        auto move = std::make_shared<Move>(Move(true, piece->get_row(), piece->get_col(), row, col, "", (board_state[row][col] != 0), true, piece->getPieceType()));
-        if (piece->getPieceType() != 'K' && is_opponents_move_legal(piece, board_state, row,col)) {
-            available_moves.push_back(move);
-        }
-        else if(piece->getPieceType() == 'K' && is_opponents_king_move_legal(piece, board_state, row, col)) {
-            available_moves.push_back(move);
-        }
-    }
-
-    if(piece->getPieceType() == 'K') {
-        if (check_castle('s')) {
-            auto move = std::make_shared<Move>(Move(true, piece->get_row(), piece->get_col(), -1, -1, "short", false, false,'x'));
-            available_moves.push_back(move);
-        }
-        if (check_castle('l')) {
-            auto move = std::make_shared<Move>(Move(true, piece->get_row(), piece->get_col(), -1, -1, "long", false, false,'x'));
-            available_moves.push_back(move);
-        }
-    }
-
-    return available_moves;
-}
-
-
-bool Game::has_piece_available_move(std::shared_ptr<Chess_Piece> piece, int piece_owner) {
-    std::vector<std::tuple<int, int>> coord_candidates = piece->get_available_coords_to_move_to(piece_owner, board_state);
-    for (const auto& coord : coord_candidates) {
-        int row = std::get<0>(coord);
-        int col = std::get<1>(coord);
-        auto move = std::make_shared<Move>(Move(true, piece->get_row(), piece->get_col(), row, col, "", (board_state[row][col] != 0), true, piece->getPieceType()));
-        if (piece->getPieceType() != 'K' && is_opponents_move_legal(piece, board_state, row,col)) {
-            return true;
-        }
-        if(piece->getPieceType() == 'K' && is_opponents_king_move_legal(piece, board_state, row, col)) {
-            return true;
-        }
-    }
-return false;
-}
-
-std::list<std::vector<std::shared_ptr<Move>>> Game::get_all_available_moves() {
-    auto active_pieces = (active_player > 0) ? white_pieces : black_pieces;
-
-    std::list<std::vector<std::shared_ptr<Move>>> available_moves;
-
-    for (auto piece : active_pieces) {
-        available_moves.push_back(get_available_moves(piece, active_player));
-    }
-    return available_moves;
-}
+std::unordered_map<std::string, int> Game::pieceToValue = {
+    {"EMPTY", EE},
+    {"BK", BK},
+    {"BQ", BQ},
+    {"BB", BB},
+    {"BN", BN},
+    {"BR", BR},
+    {"BP", BP},
+    {"WK", WK},
+    {"WQ", WQ},
+    {"WB", WB},
+    {"WN", WN},
+    {"WR", WR},
+    {"WP", WP}
+};
