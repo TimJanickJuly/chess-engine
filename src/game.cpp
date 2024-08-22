@@ -112,6 +112,9 @@ bool Game::consider_move(std::shared_ptr<Move> move) {
     if(move->is_promotion && (move ->row_target != promotion_row || move->getPieceToMove() != 'P')) {
         return false;
     }
+    if(!move->is_promotion && move ->row_target == promotion_row && move->getPieceToMove() == 'P') {
+        return false;
+    }
 
     // Handle Castling Moves
 
@@ -289,8 +292,6 @@ bool Game::is_opponents_king_move_legal(
 
     auto attacking_pieces = active_pieces;
     auto defending_king_pos = (active_player > 0)? black_king_pos : white_king_pos;
-
-    assert(defending_king_ptr->get_row() == std::get<0>(defending_king_pos) && defending_king_ptr->get_col() == std::get<1>(defending_king_pos) && "Error in is_opponents_king_move_legal");
 
     masked_coords = std::make_shared<std::tuple<int,int>>(std::make_tuple(new_row_king, new_col_king));
     bool result = !is_square_attacked(std::make_tuple(new_row_king, new_col_king), attacking_pieces, board_state, true);

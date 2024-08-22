@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
             board->print_history();
             std::cout << "\n";
             //print_board(*board);
-            std::cout << "Commands: a legal chess move, 'show' to see the board, 'moves' to get a list of all possible moves\n\n";
+            std::cout << "Commands: a legal chess move, 'show' to see the board, 'moves' to get a list of all legal moves\n\n";
             if (board->active_player ==  1) {
                 std::cout << "White's Turn: \n";
             }
