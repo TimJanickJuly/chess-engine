@@ -229,7 +229,7 @@ bool Game::consider_move(std::shared_ptr<Move> move) {
 bool Game::is_own_king_in_check_after_move(
     const std::shared_ptr<Chess_Piece> piece_to_move,
     std::shared_ptr<Move> move,
-    const int8_t board_state[8][8]
+    const int board_state[8][8]
 ) {
     std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> attacking_pieces;
 
@@ -250,7 +250,7 @@ bool Game::is_own_king_in_check_after_move(
     // if the piece to move is not a king then simulate the new board state and check wheter king is safe in this position
     // the coords which are moved to are masked again s.t. a captured piece in the new position cannot attack the king
 
-        int8_t board_state_copy[8][8];
+        int board_state_copy[8][8];
         memcpy(board_state_copy, board_state, sizeof(board_state_copy));
 
         int target_row = move->get_row_CoordTarget();
@@ -258,7 +258,7 @@ bool Game::is_own_king_in_check_after_move(
 
         int start_row = piece_to_move->get_row();
         int start_col = piece_to_move->get_col();
-        int8_t piece_value;
+        int piece_value;
 
         switch (abs(piece_to_move->getPieceType())) {
             case 'P': piece_value = 1; break;
@@ -282,7 +282,7 @@ bool Game::is_own_king_in_check_after_move(
 
 bool Game::is_opponents_king_move_legal(
     const std::shared_ptr<Chess_Piece> defending_king_ptr,
-    const int8_t board_state[8][8], int new_row_king, int new_col_king
+    const int board_state[8][8], int new_row_king, int new_col_king
 ) {
     auto attacking_pieces = active_pieces;
     auto defending_king_pos = (active_player > 0)? black_king_pos : white_king_pos;
@@ -297,7 +297,7 @@ bool Game::is_opponents_king_move_legal(
 
 bool Game::is_opponents_move_legal(
     const std::shared_ptr<Chess_Piece> piece_to_move_ptr,
-    const int8_t board_state[8][8],
+    const int board_state[8][8],
     int new_row,
     int new_col
 ) {
@@ -306,13 +306,13 @@ bool Game::is_opponents_move_legal(
     auto defending_king_pos = (active_player > 0)? black_king_pos : white_king_pos;
 
 
-    int8_t board_state_copy[8][8];
+    int board_state_copy[8][8];
     memcpy(board_state_copy, board_state, sizeof(board_state_copy));
 
     int start_row = piece_to_move_ptr->get_row();
     int start_col = piece_to_move_ptr->get_col();
 
-    int8_t piece_value;
+    int piece_value;
     switch (abs(piece_to_move_ptr->getPieceType())) {
         case 'P': piece_value = 1; break;
         case 'N': piece_value = 3; break;
@@ -337,7 +337,7 @@ bool Game::is_opponents_move_legal(
 
 bool Game::is_square_attacked(const std::tuple<int, int> &square,
                               std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> attacking_pieces,
-                              const int8_t board_state[8][8], bool is_defense) const{
+                              const int board_state[8][8], bool is_defense) const{
 
     int row = std::get<0>(square);
     int col = std::get<1>(square);
@@ -353,7 +353,7 @@ bool Game::is_square_attacked(const std::tuple<int, int> &square,
 
 void Game::execute_move(std::shared_ptr<Chess_Piece> piece, std::shared_ptr<Move> move) {
 
-    int8_t piece_value;
+    int piece_value;
 
     switch (piece->getPieceType()) {
         case 'P': piece_value = 1; break; // Pawn
@@ -805,7 +805,7 @@ bool Game::is_stalemate() {
 void Game::promote_pawn(std::shared_ptr<Chess_Piece>piece_ptr, char promotion_type) {
     piece_ptr->setPieceType(promotion_type);
 
-    int8_t new_piece_value;
+    int new_piece_value;
     switch (promotion_type) {
         case 'P': new_piece_value = 1; break; // Pawn
         case 'N': new_piece_value = 3; break; // Knight
@@ -815,7 +815,7 @@ void Game::promote_pawn(std::shared_ptr<Chess_Piece>piece_ptr, char promotion_ty
         case 'K': new_piece_value = 10; break; // King
         default: throw std::invalid_argument("Invalid Promotion Type");
     }
-    int8_t color = (active_player > 0) ? 1 : -1;
+    int color = (active_player > 0) ? 1 : -1;
 
     board_state[piece_ptr->get_row()][piece_ptr->get_col()] = new_piece_value * color;
 }

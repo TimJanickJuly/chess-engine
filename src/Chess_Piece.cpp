@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-bool Chess_Piece::is_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
+bool Chess_Piece::is_move_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
     int piece_color = (color == "white") ? 1 : -1;
 
     if (target_coord_row < 0 || target_coord_row >= 8 || target_coord_col < 0 || target_coord_col >= 8) {
@@ -32,7 +32,7 @@ bool Chess_Piece::is_move_possible(const int8_t board[8][8], int target_coord_ro
     }
 }
 
-bool Chess_Piece::is_pawn_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
+bool Chess_Piece::is_pawn_move_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
     int row_start = get_row();
     int col_start = get_col();
     std::string color = getColor();
@@ -63,7 +63,7 @@ bool Chess_Piece::is_pawn_move_possible(const int8_t board[8][8], int target_coo
     return false;
 }
 
-bool Chess_Piece::is_king_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const {
+bool Chess_Piece::is_king_move_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const {
     int row_start = get_row();
     int col_start = get_col();
     std::string color = getColor();
@@ -87,7 +87,7 @@ bool Chess_Piece::is_king_move_possible(const int8_t board[8][8], int target_coo
 }
 
 
-bool Chess_Piece::is_knight_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const {
+bool Chess_Piece::is_knight_move_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture) const {
     int row_start = get_row();
     int col_start = get_col();
     std::string color = getColor();
@@ -102,7 +102,7 @@ bool Chess_Piece::is_knight_move_possible(const int8_t board[8][8], int target_c
     return false;
 }
 
-bool Chess_Piece::is_path_clear(const int8_t board[8][8], int start_row, int start_col, int end_row, int end_col) const {
+bool Chess_Piece::is_path_clear(const int board[8][8], int start_row, int start_col, int end_row, int end_col) const {
     int row_step = (end_row > start_row) ? 1 : (end_row < start_row) ? -1 : 0;
     int col_step = (end_col > start_col) ? 1 : (end_col < start_col) ? -1 : 0;
 
@@ -120,7 +120,7 @@ bool Chess_Piece::is_path_clear(const int8_t board[8][8], int start_row, int sta
     return true;
 }
 
-bool Chess_Piece::is_target_valid(const int8_t board[8][8], int target_row, int target_col, int piece_color, bool is_capture, bool is_defense) const {
+bool Chess_Piece::is_target_valid(const int board[8][8], int target_row, int target_col, int piece_color, bool is_capture, bool is_defense) const {
     if (target_row < 0 || target_row >= 8 || target_col < 0 || target_col >= 8) {
         return false;
     }
@@ -134,7 +134,7 @@ bool Chess_Piece::is_target_valid(const int8_t board[8][8], int target_row, int 
 }
 
 
-bool Chess_Piece::is_rook_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
+bool Chess_Piece::is_rook_move_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
     int row_start = get_row();
     int col_start = get_col();
     int piece_color = (getColor() == "white") ? 1 : -1;
@@ -150,7 +150,7 @@ bool Chess_Piece::is_rook_move_possible(const int8_t board[8][8], int target_coo
     return is_path_clear(board, row_start, col_start, target_coord_row, target_coord_col);
 }
 
-bool Chess_Piece::is_queen_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
+bool Chess_Piece::is_queen_move_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
     int row_start = get_row();
     int col_start = get_col();
     int piece_color = (getColor() == "white") ? 1 : -1;
@@ -166,7 +166,7 @@ bool Chess_Piece::is_queen_move_possible(const int8_t board[8][8], int target_co
 
     return false;
 }
-bool Chess_Piece::is_bishop_move_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
+bool Chess_Piece::is_bishop_move_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
     int row_start = get_row();
     int col_start = get_col();
     int piece_color = (getColor() == "white") ? 1 : -1;
@@ -186,7 +186,7 @@ bool Chess_Piece::is_bishop_move_possible(const int8_t board[8][8], int target_c
 }
 
 std::vector<std::tuple<int, int, bool>> Chess_Piece::get_available_coords_to_move_to(
-    int active_player, const int8_t board_state[8][8]) {
+    int active_player, const int board_state[8][8]) {
 
     std::vector<std::tuple<int, int, bool>> koord_candidates_and_is_capture;
     switch (getPieceType()) {
@@ -381,7 +381,7 @@ std::vector<std::tuple<int, int, bool>> Chess_Piece::get_available_coords_to_mov
 }
 
 
-bool Chess_Piece::is_en_passant_possible(const int8_t board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
+bool Chess_Piece::is_en_passant_possible(const int board[8][8], int target_coord_row, int target_coord_col, bool is_capture, bool is_defense) const {
     if(getPieceType() != 'P') {
         return false;
     }

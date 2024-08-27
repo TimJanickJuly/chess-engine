@@ -7,17 +7,17 @@
 #include <iostream>
 
 
-std::size_t BoardHashMap::BoardHasher::operator()(const int8_t board[8][8]) const {
+std::size_t BoardHashMap::BoardHasher::operator()(const int board[8][8]) const {
     std::size_t hash = 0;
     for (int i = 0; i < 8; ++i) {
         for (int j = 0; j < 8; ++j) {
-            hash ^= std::hash<int8_t>()(board[i][j]) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+            hash ^= std::hash<int>()(board[i][j]) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
         }
     }
     return hash;
 }
 
-bool BoardHashMap::memorize_board_state(const int8_t board[8][8]) {
+bool BoardHashMap::memorize_board_state(const int board[8][8]) {
     int board_hash = boardHasher(board);
     auto it = boardFrequency.find(board_hash);
     if (it != boardFrequency.end()) {

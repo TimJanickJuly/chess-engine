@@ -80,7 +80,7 @@ public:
     bool is_own_king_in_check_after_move(
         const std::shared_ptr<Chess_Piece> piece_to_move,
         std::shared_ptr<Move> move,
-        const int8_t board_state[8][8]
+        const int board_state[8][8]
     );
 
     bool is_stalemate();
@@ -100,11 +100,11 @@ private:
     void execute_castle(char castle_type);
     bool is_square_attacked(const std::tuple<int, int> &square,
                             std::shared_ptr<std::vector<std::shared_ptr<Chess_Piece>>> attacking_pieces,
-                            const int8_t board_state[8][8], bool is_defense) const;;
+                            const int board_state[8][8], bool is_defense) const;;
     std::vector<std::shared_ptr<Chess_Piece>> find_moving_piece_candidates(std::shared_ptr<Move> move);
     bool is_opponents_king_move_legal(
     const std::shared_ptr<Chess_Piece> defending_king_ptr,
-    const int8_t board_state[8][8], int new_row_king, int new_col_king);
+    const int board_state[8][8], int new_row_king, int new_col_king);
 
     bool check_castle(char castle_type);
 
@@ -132,7 +132,7 @@ private:
 
     bool is_opponents_move_legal(
     const std::shared_ptr<Chess_Piece> piece_to_move_ptr,
-    const int8_t board_state[8][8],
+    const int board_state[8][8],
     int new_row,
     int new_col);
 
@@ -141,7 +141,7 @@ private:
 private:
     BoardHashMap game_history_hash_map;
 
-    int8_t board_state[8][8] = {
+    int board_state[8][8] = {
         {WR, WN, WB, WQ, WK, WB, WN, WR},
         {WP, WP, WP, WP, WP, WP, WP, WP},
         {EE, EE, EE, EE, EE, EE, EE, EE},
